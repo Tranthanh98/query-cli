@@ -43,12 +43,14 @@ jobs:
             os: linux
             cpu: arm64
             ext: ""
-          - runner: macos-13
-            target: bun-darwin-x64
-            pkg: darwin-x64
-            os: darwin
-            cpu: x64
-            ext: ""
+          # macOS Intel (x64) disabled — macos-13 runners are often queued for hours.
+          # Re-enable if/when GitHub provides faster x64 macOS runners or demand increases.
+          # - runner: macos-13
+          #   target: bun-darwin-x64
+          #   pkg: darwin-x64
+          #   os: darwin
+          #   cpu: x64
+          #   ext: ""
           - runner: macos-14
             target: bun-darwin-arm64
             pkg: darwin-arm64
