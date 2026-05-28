@@ -12,6 +12,9 @@ interface Shortcut {
 const SHORTCUTS: Shortcut[] = [
   { key: "F5 / Ctrl+R", mac: "F5 / ⌃R", description: "Run query" },
   { key: "F9 / Ctrl+P", mac: "F9 / ⌃P", description: "Command palette" },
+  { key: "Ctrl+S", mac: "⌃S", description: "Save query" },
+  { key: "Ctrl+N", mac: "⌃N", description: "New query" },
+  { key: "Ctrl+D", mac: "⌃D", description: "Delete query" },
   { key: "Ctrl+Y", mac: "⌃Y", description: "Copy selection" },
   { key: "Ctrl+H / F1", mac: "⌃H / F1", description: "This help" },
   { key: "Ctrl+C", mac: "⌃C", description: "Quit" },

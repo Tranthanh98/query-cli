@@ -22,6 +22,9 @@ export function HeaderBar({ onRun }: { onRun?: () => void }) {
       <box flexDirection="row" gap={1}>
         <RunButton onRun={onRun} />
         <text fg={colors.textMuted}>·</text>
+        <text fg={colors.command}>Ctrl+S</text>
+        <text fg={colors.textDim}>save</text>
+        <text fg={colors.textMuted}>·</text>
         <text fg={colors.command}>(F9/Ctrl+P)</text>
         <text fg={colors.textDim}>commands</text>
         <text fg={colors.textMuted}>·</text>

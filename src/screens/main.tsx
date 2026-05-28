@@ -405,6 +405,37 @@ function MainScreenInner() {
       });
       return;
     }
+    // Ctrl+S saves the current query (prompts for a name).
+    // ⚠️ WARNING: Ctrl+S is XOFF (software flow control) on most Unix terminals.
+    // If your terminal freezes, press Ctrl+Q to resume, or disable flow control
+    // in your shell (stty -ixon).
+    if (key.ctrl && key.name === "s") {
+      const text = getEditorText();
+      openInputPrompt({
+        title: "Save query",
+        placeholder: "Query name",
+        initialValue: activeQuery?.name ?? "",
+        onConfirm: (name) => {
+          saveAs(name, text);
+        },
+      });
+      return;
+    }
+    // Ctrl+N starts a new empty query.
+    // Note: some terminal emulators capture Ctrl+N for "new window".
+    if (key.ctrl && key.name === "n") {
+      clearActive(getEditorText());
+      setEditorText("");
+      return;
+    }
+    // Ctrl+D deletes the active query.
+    // ⚠️ WARNING: Ctrl+D is EOF in terminals. If the app exits unexpectedly,
+    // pressing Ctrl+D at an empty shell prompt will close your session.
+    if (key.ctrl && key.name === "d") {
+      const fallback = deleteActive();
+      setEditorText(fallback?.text ?? "");
+      return;
+    }
     if (key.name === "escape" && aiState === "running") {
       cancelAi();
       return;
