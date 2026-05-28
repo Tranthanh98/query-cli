@@ -33,7 +33,7 @@ There are **no tests, no linter, and no formatter** in this repo.
 ## Distribution & Publishing
 
 - The published npm package is **not** the repo's `package.json`. CI generates a separate launcher package.
-- Release model: `bun build --compile` produces a self-contained binary per platform. Each binary is published as its own npm package (`query-cli-<platform>-<arch>`). The main `query-cli` package is a thin Node.js launcher (`bin/query-cli.mjs`) that resolves the correct platform binary via `optionalDependencies`.
-- **Release trigger:** push a `v*` tag, or run the `Release` workflow manually (requires `NPM_TOKEN` secret).
+- Release model: `bun build --compile` produces a self-contained binary per platform. Binaries are uploaded as GitHub Release assets. The main `query-cli` npm package contains only a thin Node.js launcher (`bin/query-cli.mjs`) that downloads the correct platform binary on first run and caches it in `~/.cache/query-cli/`.
+- **Release trigger:** push a `v*` tag, or run the `Release` workflow manually. Uses npm Trusted Publishing (OIDC) — no `NPM_TOKEN` needed.
 - CI uses `bun install --frozen-lockfile` on each platform runner to ensure the matching OpenTUI native library is embedded.
 - See `PUBLISHING.md` for full details.

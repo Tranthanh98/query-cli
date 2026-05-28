@@ -1,11 +1,13 @@
 name: Release
 
-# Compiles a standalone binary per platform with `bun build --compile`, publishes
-# each as its own npm package, then publishes the thin `query-cli` launcher package
-# that depends on them via optionalDependencies.
+# Compiles a standalone binary per platform with `bun build --compile`, uploads
+# each binary as a GitHub Release asset, then publishes the thin `query-cli`
+# launcher package that downloads the correct binary on first run.
 #
 # Trigger by pushing a tag like `v0.1.0`, or run manually via the Actions tab.
-# Requires repository secret: NPM_TOKEN (an npm automation token with publish rights).
+# Uses npm Trusted Publishing (OIDC) — no long-lived NPM_TOKEN required.
+# You must configure a Trusted Publisher on npmjs.com for the `query-cli` package
+# before first publish.
 
 on:
   push:
@@ -18,8 +20,8 @@ on:
         required: true
 
 permissions:
-  contents: read
-  id-token: write # enables npm provenance
+  contents: write # upload release assets
+  id-token: write # npm Trusted Publishing (OIDC)
 
 jobs:
   build:
@@ -96,28 +98,22 @@ jobs:
           bun build --compile --target=${{ matrix.target }} \
             src/index.tsx --outfile "query-cli${{ matrix.ext }}"
 
-      - name: Assemble platform package
-        run: |
-          PKG="query-cli-${{ matrix.pkg }}"
-          mkdir -p "dist/$PKG/bin"
-          mv "query-cli${{ matrix.ext }}" "dist/$PKG/bin/"
-          cat > "dist/$PKG/package.json" <<EOF
-          {
-            "name": "$PKG",
-            "version": "${{ steps.version.outputs.version }}",
-            "description": "Prebuilt query-cli binary for ${{ matrix.os }}/${{ matrix.cpu }}",
-            "repository": { "type": "git", "url": "git+https://github.com/thanh-infotrack-vn/query-cli.git" },
-            "os": ["${{ matrix.os }}"],
-            "cpu": ["${{ matrix.cpu }}"],
-            "files": ["bin"]
-          }
-          EOF
+      - name: Rename binary for release
+        run: mv "query-cli${{ matrix.ext }}" "query-cli-${{ matrix.pkg }}${{ matrix.ext }}"
 
-      - name: Publish platform package
-        run: npm publish --provenance --access public
-        working-directory: dist/query-cli-${{ matrix.pkg }}
+      - name: Create GitHub Release (if not exists)
+        run: |
+          gh release create "v${VERSION}" --title "v${VERSION}" --generate-notes || true
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION: ${{ steps.version.outputs.version }}
+
+      - name: Upload binary to GitHub Release
+        run: |
+          gh release upload "v${VERSION}" "query-cli-${{ matrix.pkg }}${{ matrix.ext }}" --clobber
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION: ${{ steps.version.outputs.version }}
 
   publish:
     name: query-cli (main)
@@ -156,21 +152,12 @@ jobs:
             "version": "$VERSION",
             "description": "Terminal database client",
             "type": "module",
-            "repository": { "type": "git", "url": "git+https://github.com/thanh-infotrack-vn/query-cli.git" },
+            "repository": { "type": "git", "url": "git+https://github.com/Tranthanh98/query-cli.git" },
             "bin": { "query-cli": "bin/query-cli.mjs" },
-            "files": ["bin"],
-            "optionalDependencies": {
-              "query-cli-linux-x64": "$VERSION",
-              "query-cli-linux-arm64": "$VERSION",
-              "query-cli-darwin-x64": "$VERSION",
-              "query-cli-darwin-arm64": "$VERSION",
-              "query-cli-win32-x64": "$VERSION"
-            }
+            "files": ["bin"]
           }
           EOF
 
       - name: Publish main package
-        run: npm publish --provenance --access public
+        run: npm publish --access public
         working-directory: dist/query-cli
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

@@ -3,44 +3,126 @@
 //
 // `query-cli` ships no runnable JS of its own — the real program is a standalone
 // binary compiled with `bun build --compile` (Bun runtime + OpenTUI native libs
-// embedded). One binary per platform is published as a separate package and wired
-// up via optionalDependencies, so npm/pnpm/yarn install only the matching one.
+// embedded). One binary per platform is published as a GitHub Release asset.
 //
-// This launcher runs on plain Node (no Bun required), resolves the binary for the
-// current platform, and re-execs it with the user's args and the real TTY.
+// This launcher runs on plain Node (no Bun required). On first run it downloads
+// the correct binary for the current platform into `~/.cache/query-cli/`, then
+// re-execs it with the user's args and the real TTY.
 import { spawnSync } from "node:child_process";
 import { createRequire } from "node:module";
-import { chmodSync } from "node:fs";
+import {
+  chmodSync,
+  existsSync,
+  mkdirSync,
+  renameSync,
+  createWriteStream,
+} from "node:fs";
+import { homedir } from "node:os";
+import path from "node:path";
+import https from "node:https";
 
 const require = createRequire(import.meta.url);
+const { version } = require("../package.json");
 
 const platformKey = `${process.platform}-${process.arch}`;
-const pkgName = `query-cli-${platformKey}`;
-const binName = process.platform === "win32" ? "query-cli.exe" : "query-cli";
+const ext = process.platform === "win32" ? ".exe" : "";
+const binName = `query-cli${ext}`;
 
-let binPath;
-try {
-  binPath = require.resolve(`${pkgName}/bin/${binName}`);
-} catch {
+const supported = [
+  "linux-x64",
+  "linux-arm64",
+  "darwin-x64",
+  "darwin-arm64",
+  "win32-x64",
+];
+if (!supported.includes(platformKey)) {
   console.error(
     `query-cli: no prebuilt binary for this platform (${platformKey}).\n` +
-      `The optional dependency "${pkgName}" was not installed.\n` +
-      `Supported: linux-x64, linux-arm64, darwin-x64, darwin-arm64, win32-x64.\n` +
-      `If your platform is supported, reinstall without --no-optional / --ignore-optional.`,
+      `Supported: ${supported.join(", ")}.\n` +
+      `If you need support for another platform, please open an issue at:\n` +
+      `https://github.com/Tranthanh98/query-cli/issues`,
   );
   process.exit(1);
 }
 
-// npm usually preserves the executable bit, but pnpm/yarn extraction can drop it.
+const cacheDir = path.join(homedir(), ".cache", "query-cli");
+const cachedBin = path.join(
+  cacheDir,
+  `${binName}-${version}-${platformKey}${ext}`,
+);
+
+function download(url, dest) {
+  return new Promise((resolve, reject) => {
+    const file = createWriteStream(dest);
+    https
+      .get(url, { headers: { "User-Agent": "query-cli" } }, (res) => {
+        if (
+          res.statusCode >= 300 &&
+          res.statusCode < 400 &&
+          res.headers.location
+        ) {
+          // Follow single redirect (GitHub Releases -> objects.githubusercontent.com)
+          https
+            .get(
+              res.headers.location,
+              { headers: { "User-Agent": "query-cli" } },
+              (res2) => {
+                if (res2.statusCode !== 200) {
+                  reject(
+                    new Error(`Download failed with status ${res2.statusCode}`),
+                  );
+                  return;
+                }
+                res2.pipe(file);
+                file.on("finish", () => {
+                  file.close();
+                  resolve();
+                });
+              },
+            )
+            .on("error", reject);
+        } else if (res.statusCode === 200) {
+          res.pipe(file);
+          file.on("finish", () => {
+            file.close();
+            resolve();
+          });
+        } else {
+          reject(new Error(`Download failed with status ${res.statusCode}`));
+        }
+      })
+      .on("error", reject);
+  });
+}
+
+if (!existsSync(cachedBin)) {
+  mkdirSync(cacheDir, { recursive: true });
+  const url = `https://github.com/Tranthanh98/query-cli/releases/download/v${version}/query-cli-${platformKey}${ext}`;
+
+  console.error(
+    `query-cli: downloading binary for ${platformKey} v${version}...`,
+  );
+
+  const tmpPath = cachedBin + ".tmp";
+  try {
+    await download(url, tmpPath);
+    renameSync(tmpPath, cachedBin);
+  } catch (err) {
+    console.error(`query-cli: failed to download binary.\n${err.message}`);
+    process.exit(1);
+  }
+}
+
+// npm usually preserves the executable bit, but the cache file may not have it.
 if (process.platform !== "win32") {
   try {
-    chmodSync(binPath, 0o755);
+    chmodSync(cachedBin, 0o755);
   } catch {
     // best-effort; if it's already executable this is a no-op
   }
 }
 
-const { status, signal, error } = spawnSync(binPath, process.argv.slice(2), {
+const { status, signal, error } = spawnSync(cachedBin, process.argv.slice(2), {
   stdio: "inherit",
 });
 
