@@ -161,5 +161,5 @@ jobs:
           EOF
 
       - name: Publish main package
-        run: npm publish --access public
+        run: npm publish --access public --provenance
         working-directory: dist/query-cli
