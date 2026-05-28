@@ -22,7 +22,21 @@ import path from "node:path";
 import https from "node:https";
 
 const require = createRequire(import.meta.url);
-const { version } = require("../package.json");
+let version = process.env.QUERY_CLI_VERSION;
+if (!version) {
+  try {
+    version = require("../package.json").version;
+  } catch {
+    version = "0.0.0";
+  }
+}
+if (version === "0.0.0") {
+  console.error(
+    "query-cli: version is 0.0.0. If you're testing locally, set QUERY_CLI_VERSION\n" +
+      "to a released version, e.g. QUERY_CLI_VERSION=0.1.0 node bin/query-cli.mjs",
+  );
+  process.exit(1);
+}
 
 const platformKey = `${process.platform}-${process.arch}`;
 const ext = process.platform === "win32" ? ".exe" : "";

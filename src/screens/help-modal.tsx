@@ -2,27 +2,34 @@ import { useKeyboard } from "@opentui/react";
 import { colors } from "../theme";
 
 interface Shortcut {
-  keys: string;
+  key: string;
+  mac: string;
   description: string;
 }
 
 // Keyboard shortcuts shown in the help popup. Keep in sync with the global key
-// handler in main.tsx and the header-bar hints.
+// handler in main.tsx, the header-bar hints, and README.md.
 const SHORTCUTS: Shortcut[] = [
-  { keys: "F5 / Ctrl+R", description: "Run query" },
-  { keys: "F9 / Ctrl+P", description: "Command palette" },
-  { keys: "Ctrl+Y", description: "Copy selection" },
-  { keys: "Ctrl+H / F1", description: "This help" },
-  { keys: "Ctrl+C", description: "Quit" },
+  { key: "F5 / Ctrl+R", mac: "F5 / ⌃R", description: "Run query" },
+  { key: "F9 / Ctrl+P", mac: "F9 / ⌃P", description: "Command palette" },
+  { key: "Ctrl+Y", mac: "⌃Y", description: "Copy selection" },
+  { key: "Ctrl+H / F1", mac: "⌃H / F1", description: "This help" },
+  { key: "Ctrl+C", mac: "⌃C", description: "Quit" },
 ];
 
-const AI_HINTS: Shortcut[] = [
+interface AiHint {
+  keys: string;
+  description: string;
+}
+
+const AI_HINTS: AiHint[] = [
   { keys: "@ai: …", description: "Ask AI in the editor (Enter to run)" },
   { keys: "/ask-ai", description: "Insert @ai: at the cursor" },
   { keys: "/ai-config", description: "Configure AI adapter and model" },
 ];
 
 const KEY_COLUMN_WIDTH = 16;
+const MAC_COLUMN_WIDTH = 14;
 
 export function HelpModal({ onClose }: { onClose: () => void }) {
   useKeyboard((key) => {
@@ -56,9 +63,12 @@ export function HelpModal({ onClose }: { onClose: () => void }) {
       >
         <box flexDirection="column">
           {SHORTCUTS.map((s) => (
-            <box key={s.keys} flexDirection="row">
+            <box key={s.key} flexDirection="row">
               <box width={KEY_COLUMN_WIDTH}>
-                <text fg={colors.command}>{s.keys}</text>
+                <text fg={colors.command}>{s.key}</text>
+              </box>
+              <box width={MAC_COLUMN_WIDTH}>
+                <text fg={colors.command}>{s.mac}</text>
               </box>
               <text fg={colors.text}>{s.description}</text>
             </box>

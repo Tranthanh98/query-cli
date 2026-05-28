@@ -3,16 +3,21 @@ import { useMemo, useState } from "react";
 import { useApp } from "../app-context";
 import { colors } from "../theme";
 
-// Border + padding + input + hint row + gaps take up ~9 lines; cap the list
+// Border + padding + input + hint row + gaps take up ~10 lines; cap the list
 // at whatever's left so the palette never overflows the terminal.
-const PALETTE_CHROME_ROWS = 9;
+// Each item renders 2 lines (description + name).
+const PALETTE_CHROME_ROWS = 10;
 const PALETTE_MIN_ROWS = 3;
 const PALETTE_WIDTH = 60;
+const ITEM_HEIGHT = 2;
 
 export function CommandPalette() {
   const { commands, closePalette, runSlashCommand } = useApp();
   const { height } = useTerminalDimensions();
-  const maxRows = Math.max(PALETTE_MIN_ROWS, height - PALETTE_CHROME_ROWS);
+  const maxItems = Math.max(
+    PALETTE_MIN_ROWS,
+    Math.floor((height - PALETTE_CHROME_ROWS) / ITEM_HEIGHT),
+  );
   const [query, setQuery] = useState("");
   const [selectedIndex, setSelectedIndex] = useState(0);
 
@@ -65,11 +70,11 @@ export function CommandPalette() {
   const windowStart = Math.max(
     0,
     Math.min(
-      safeIndex - Math.floor(maxRows / 2),
-      Math.max(0, filtered.length - maxRows),
+      safeIndex - Math.floor(maxItems / 2),
+      Math.max(0, filtered.length - maxItems),
     ),
   );
-  const visible = filtered.slice(windowStart, windowStart + maxRows);
+  const visible = filtered.slice(windowStart, windowStart + maxItems);
 
   return (
     <box
@@ -117,13 +122,18 @@ export function CommandPalette() {
             {commands.length === 0 ? "No commands available." : "No matches."}
           </text>
         ) : (
-          <box flexDirection="column" width={PALETTE_WIDTH}>
+          <box
+            flexDirection="column"
+            width={PALETTE_WIDTH}
+            maxHeight={maxItems * ITEM_HEIGHT}
+          >
             {visible.map((cmd, i) => {
               const absoluteIndex = windowStart + i;
               const isSelected = absoluteIndex === safeIndex;
               return (
                 <box
                   key={cmd.name}
+                  height={ITEM_HEIGHT}
                   border={["left"]}
                   borderStyle="heavy"
                   borderColor={isSelected ? colors.command : "transparent"}

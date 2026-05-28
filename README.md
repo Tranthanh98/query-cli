@@ -33,19 +33,15 @@ On first launch, you'll land on the **connection selection** screen. Add a new c
 
 ### Keybindings
 
-| Key | Action |
-|-----|--------|
-| `Ctrl + P` | Open command palette |
-| `Ctrl + Enter` | Run query |
-| `Ctrl + S` | Save query |
-| `Ctrl + Shift + S` | Save query as... |
-| `Ctrl + W` | Close active query tab |
-| `Ctrl + Shift + W` | Close all query tabs |
-| `Ctrl + Tab` | Next query tab |
-| `Ctrl + Shift + Tab` | Previous query tab |
-| `Ctrl + N` | New query tab |
-| `Ctrl + Q` | Disconnect and go back |
-| `Ctrl + C` | Quit |
+| Key (Linux / Windows) | macOS | Action |
+|---|---|---|
+| `F5` / `Ctrl + R` | `F5` / `Control + R` | Run query |
+| `F9` / `Ctrl + P` | `F9` / `Control + P` | Open command palette |
+| `F1` / `Ctrl + H` | `F1` / `Control + H` | Show keyboard shortcuts help |
+| `Ctrl + Y` | `Control + Y` | Copy selection to clipboard |
+| `Ctrl + C` | `Control + C` | Quit |
+
+> Tab management (new, switch, save, rename, delete) and other actions are available through slash commands in the editor — type `/` to see the list.
 
 ## Development
 
