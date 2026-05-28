@@ -1,6 +1,6 @@
 {
   "name": "query-cli",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Terminal database client",
   "type": "module",
   "module": "src/index.tsx",
