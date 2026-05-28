@@ -1,4 +1,6 @@
-import { useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useApp } from "../app-context";
+import { loadSearchState, saveSearchState } from "../config/search-state";
 import { useQueries } from "../queries-context";
 import { useSchema, type ColumnsState, type TablesState } from "../schema-context";
 import { colors } from "../theme";
@@ -17,6 +19,7 @@ export function QueriesPanel({ width, onSelectQuery }: QueriesPanelProps) {
   const [activeTab, setActiveTab] = useState<Tab>("database");
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const { tablesState } = useSchema();
+  const { connection } = useApp();
 
   return (
     <box
@@ -45,6 +48,7 @@ export function QueriesPanel({ width, onSelectQuery }: QueriesPanelProps) {
 
       {activeTab === "database" ? (
         <DatabaseTab
+          connectionId={connection?.id ?? ""}
           state={tablesState}
           visibleCount={visibleCount}
           onLoadMore={() => setVisibleCount((n) => n + PAGE_SIZE)}
@@ -79,21 +83,83 @@ function TabHeader({
 }
 
 function DatabaseTab({
+  connectionId,
   state,
   visibleCount,
   onLoadMore,
 }: {
+  connectionId: string;
   state: TablesState;
   visibleCount: number;
   onLoadMore: () => void;
 }) {
   const { columnsCache, ensureColumns } = useSchema();
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
+  const [tableQuery, setTableQuery] = useState("");
+  const [schemaQuery, setSchemaQuery] = useState("");
+  const [schemaExpanded, setSchemaExpanded] = useState(false);
+  const loadedRef = useRef(false);
+
+  // Load persisted search state when connection changes.
+  useEffect(() => {
+    loadedRef.current = false;
+    setTableQuery("");
+    setSchemaQuery("");
+    setSchemaExpanded(false);
+    if (!connectionId) return;
+    loadSearchState()
+      .then((stateMap) => {
+        const saved = stateMap[connectionId];
+        if (saved) {
+          setTableQuery(saved.tableQuery ?? "");
+          setSchemaQuery(saved.schemaQuery ?? "");
+          setSchemaExpanded(saved.schemaExpanded ?? false);
+        }
+        loadedRef.current = true;
+      })
+      .catch(() => {
+        loadedRef.current = true;
+      });
+  }, [connectionId]);
+
+  // Persist search state when it changes.
+  useEffect(() => {
+    if (!connectionId || !loadedRef.current) return;
+    const timeout = setTimeout(() => {
+      void loadSearchState().then((stateMap) => {
+        stateMap[connectionId] = { tableQuery, schemaQuery, schemaExpanded };
+        void saveSearchState(stateMap);
+      });
+    }, 300);
+    return () => clearTimeout(timeout);
+  }, [connectionId, tableQuery, schemaQuery, schemaExpanded]);
 
   const handleToggle = (name: string) => {
     setExpanded((prev) => ({ ...prev, [name]: !prev[name] }));
     ensureColumns(name);
   };
+
+  const clearSearch = useCallback(() => {
+    setTableQuery("");
+    setSchemaQuery("");
+  }, []);
+
+  const tables = state.kind === "loaded" ? state.tables : [];
+
+  const filteredTables = useMemo(() => {
+    return tables.filter((name) => {
+      const parts = name.split(".");
+      const schema = parts.length > 1 ? parts[0] : "";
+      const tableName = parts.length > 1 ? parts.slice(1).join(".") : name;
+      if (schemaQuery && !schema.toLowerCase().includes(schemaQuery.toLowerCase())) {
+        return false;
+      }
+      if (tableQuery && !tableName.toLowerCase().includes(tableQuery.toLowerCase())) {
+        return false;
+      }
+      return true;
+    });
+  }, [tables, tableQuery, schemaQuery]);
 
   if (state.kind === "idle") {
     return <text fg={colors.textDim}>Not connected.</text>;
@@ -105,16 +171,49 @@ function DatabaseTab({
     return <text fg={colors.error}>Error: {state.message}</text>;
   }
 
-  const { tables } = state;
   if (tables.length === 0) {
     return <text fg={colors.textDim}>No tables in this database.</text>;
   }
 
-  const shown = tables.slice(0, visibleCount);
-  const remaining = tables.length - shown.length;
+  const shown = filteredTables.slice(0, visibleCount);
+  const remaining = filteredTables.length - shown.length;
 
   return (
-    <box flexDirection="column" flexGrow={1} flexShrink={1}>
+    <box flexDirection="column" flexGrow={1} flexShrink={1} gap={1}>
+      <box flexDirection="column" flexShrink={0} gap={1}>
+        <box flexDirection="row" gap={1} alignItems="center" height={1}>
+          <box onMouseDown={() => setSchemaExpanded((v) => !v)}>
+            <text fg={colors.panelQueries}>{schemaExpanded ? "▾" : "▸"}</text>
+          </box>
+          <input
+            flexGrow={1}
+            placeholder="Search table name..."
+            placeholderColor={colors.textMuted}
+            value={tableQuery}
+            onInput={setTableQuery}
+          />
+        </box>
+        {schemaExpanded && (
+          <input
+            flexGrow={1}
+            placeholder="Search schema... (e.g. dbo, pgboss)"
+            placeholderColor={colors.textMuted}
+            value={schemaQuery}
+            onInput={setSchemaQuery}
+          />
+        )}
+        {(tableQuery || schemaQuery) && (
+          <box
+            paddingLeft={1}
+            paddingRight={1}
+            backgroundColor={colors.selectedBg}
+            onMouseDown={clearSearch}
+            flexShrink={0}
+          >
+            <text fg={colors.selectedFg}>Clear search</text>
+          </box>
+        )}
+      </box>
       <scrollbox
         scrollY
         rootOptions={{ flexGrow: 1 }}
@@ -132,7 +231,8 @@ function DatabaseTab({
       </scrollbox>
       <box flexDirection="column" flexShrink={0} marginTop={0}>
         <text fg={colors.textMuted}>
-          {shown.length} of {tables.length}
+          {shown.length} of {filteredTables.length}
+          {filteredTables.length !== tables.length ? ` (filtered from ${tables.length})` : ""}
         </text>
         {remaining > 0 ? (
           <box

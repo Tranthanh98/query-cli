@@ -1,10 +1,18 @@
 import { useState } from "react";
+import { useTerminalDimensions } from "@opentui/react";
 import { useApp } from "../app-context";
 import { colors } from "../theme";
 
 export function HeaderBar({ onRun }: { onRun?: () => void }) {
   const { connection } = useApp();
+  const { width } = useTerminalDimensions();
   if (!connection) return null;
+
+  // Responsive: drop hints as the terminal narrows.
+  const showSave = width >= 90;
+  const showCmds = width >= 70;
+  const showQuit = width >= 55;
+
   return (
     <box
       flexDirection="row"
@@ -21,15 +29,27 @@ export function HeaderBar({ onRun }: { onRun?: () => void }) {
       </box>
       <box flexDirection="row" gap={1}>
         <RunButton onRun={onRun} />
-        <text fg={colors.textMuted}>·</text>
-        <text fg={colors.command}>Ctrl+S</text>
-        <text fg={colors.textDim}>save</text>
-        <text fg={colors.textMuted}>·</text>
-        <text fg={colors.command}>(F9/Ctrl+P)</text>
-        <text fg={colors.textDim}>commands</text>
-        <text fg={colors.textMuted}>·</text>
-        <text fg={colors.command}>ctrl+c</text>
-        <text fg={colors.textDim}>quit</text>
+        {showSave && (
+          <>
+            <text fg={colors.textMuted}>·</text>
+            <text fg={colors.command}>Ctrl+S</text>
+            <text fg={colors.textDim}>save</text>
+          </>
+        )}
+        {showCmds && (
+          <>
+            <text fg={colors.textMuted}>·</text>
+            <text fg={colors.command}>(F9/Ctrl+P)</text>
+            <text fg={colors.textDim}>commands</text>
+          </>
+        )}
+        {showQuit && (
+          <>
+            <text fg={colors.textMuted}>·</text>
+            <text fg={colors.command}>ctrl+c</text>
+            <text fg={colors.textDim}>quit</text>
+          </>
+        )}
       </box>
     </box>
   );
