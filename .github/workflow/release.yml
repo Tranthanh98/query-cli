@@ -1,0 +1,176 @@
+name: Release
+
+# Compiles a standalone binary per platform with `bun build --compile`, publishes
+# each as its own npm package, then publishes the thin `query-cli` launcher package
+# that depends on them via optionalDependencies.
+#
+# Trigger by pushing a tag like `v0.1.0`, or run manually via the Actions tab.
+# Requires repository secret: NPM_TOKEN (an npm automation token with publish rights).
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to publish (no leading v), e.g. 0.1.0"
+        required: true
+
+permissions:
+  contents: read
+  id-token: write # enables npm provenance
+
+jobs:
+  build:
+    name: ${{ matrix.pkg }}
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: true
+      matrix:
+        include:
+          - runner: ubuntu-latest
+            target: bun-linux-x64
+            pkg: linux-x64
+            os: linux
+            cpu: x64
+            ext: ""
+          - runner: ubuntu-24.04-arm
+            target: bun-linux-arm64
+            pkg: linux-arm64
+            os: linux
+            cpu: arm64
+            ext: ""
+          - runner: macos-13
+            target: bun-darwin-x64
+            pkg: darwin-x64
+            os: darwin
+            cpu: x64
+            ext: ""
+          - runner: macos-14
+            target: bun-darwin-arm64
+            pkg: darwin-arm64
+            os: darwin
+            cpu: arm64
+            ext: ""
+          - runner: windows-latest
+            target: bun-windows-x64
+            pkg: win32-x64
+            os: win32
+            cpu: x64
+            ext: ".exe"
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          registry-url: "https://registry.npmjs.org"
+
+      - name: Resolve version
+        id: version
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            VERSION="${{ github.event.inputs.version }}"
+          else
+            VERSION="${GITHUB_REF_NAME#v}"
+          fi
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "Building query-cli-${{ matrix.pkg }}@$VERSION"
+
+      # Installs deps for THIS runner's platform, so the matching OpenTUI native
+      # Zig library gets pulled in and embedded by --compile. This is why we build
+      # each target on its own runner instead of cross-compiling from one machine.
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Compile standalone binary
+        run: |
+          bun build --compile --target=${{ matrix.target }} \
+            src/index.tsx --outfile "query-cli${{ matrix.ext }}"
+
+      - name: Assemble platform package
+        run: |
+          PKG="query-cli-${{ matrix.pkg }}"
+          mkdir -p "dist/$PKG/bin"
+          mv "query-cli${{ matrix.ext }}" "dist/$PKG/bin/"
+          cat > "dist/$PKG/package.json" <<EOF
+          {
+            "name": "$PKG",
+            "version": "${{ steps.version.outputs.version }}",
+            "description": "Prebuilt query-cli binary for ${{ matrix.os }}/${{ matrix.cpu }}",
+            "repository": { "type": "git", "url": "git+https://github.com/thanh-infotrack-vn/query-cli.git" },
+            "os": ["${{ matrix.os }}"],
+            "cpu": ["${{ matrix.cpu }}"],
+            "files": ["bin"]
+          }
+          EOF
+
+      - name: Publish platform package
+        run: npm publish --provenance --access public
+        working-directory: dist/query-cli-${{ matrix.pkg }}
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+  publish:
+    name: query-cli (main)
+    needs: build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          registry-url: "https://registry.npmjs.org"
+
+      - name: Resolve version
+        id: version
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            VERSION="${{ github.event.inputs.version }}"
+          else
+            VERSION="${GITHUB_REF_NAME#v}"
+          fi
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Assemble main package
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          mkdir -p dist/query-cli/bin
+          cp bin/query-cli.mjs dist/query-cli/bin/query-cli.mjs
+          [ -f README.md ] && cp README.md dist/query-cli/ || true
+          cat > dist/query-cli/package.json <<EOF
+          {
+            "name": "query-cli",
+            "version": "$VERSION",
+            "description": "Terminal database client",
+            "type": "module",
+            "repository": { "type": "git", "url": "git+https://github.com/thanh-infotrack-vn/query-cli.git" },
+            "bin": { "query-cli": "bin/query-cli.mjs" },
+            "files": ["bin"],
+            "optionalDependencies": {
+              "query-cli-linux-x64": "$VERSION",
+              "query-cli-linux-arm64": "$VERSION",
+              "query-cli-darwin-x64": "$VERSION",
+              "query-cli-darwin-arm64": "$VERSION",
+              "query-cli-win32-x64": "$VERSION"
+            }
+          }
+          EOF
+
+      - name: Publish main package
+        run: npm publish --provenance --access public
+        working-directory: dist/query-cli
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
