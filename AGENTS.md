@@ -30,6 +30,13 @@ There are **no tests, no linter, and no formatter** in this repo.
 - `types` includes `bun-types`.
 - `noUncheckedIndexedAccess` is `false`.
 
+## Documentation Site
+
+- Built with **VitePress** inside `docs-page/`.
+- Run locally: `cd docs-page && bun install && bun run dev`
+- Build: `cd docs-page && bun run build` → output at `docs-page/.vitepress/dist`
+- Deployed automatically via `.github/workflows/deploy-docs.yml` on every push to `main`.
+
 ## Distribution & Publishing
 
 - The published npm package is **not** the repo's `package.json`. CI generates a separate launcher package.

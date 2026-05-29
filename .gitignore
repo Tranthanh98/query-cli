@@ -2,3 +2,4 @@ node_modules
 dist
 PUBLISHING.md
 release.md
+docs-page/.vitepress/cache
