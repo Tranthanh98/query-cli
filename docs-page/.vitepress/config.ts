@@ -7,12 +7,14 @@ export default defineConfig({
   ignoreDeadLinks: true,
   appearance: true,
   head: [
+    ["link", { rel: "icon", type: "image/png", href: "/query-cli/icon.png" }],
     ["link", { rel: "preconnect", href: "https://fonts.googleapis.com" }],
     ["link", { rel: "preconnect", href: "https://fonts.gstatic.com", crossorigin: "" }],
     ["link", { href: "https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap", rel: "stylesheet" }],
+    ["meta", { property: "og:image", content: "/query-cli/icon.png" }],
   ],
   themeConfig: {
-    logo: "/logo.svg",
+    logo: "/icon.png",
     nav: [
       { text: "Home", link: "/" },
       { text: "Guide", link: "/guide/introduction" },
