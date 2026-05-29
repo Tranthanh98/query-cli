@@ -150,11 +150,12 @@ jobs:
           [ -f README.md ] && cp README.md dist/query-cli/ || true
           cat > dist/query-cli/package.json <<EOF
           {
-            "name": "query-cli",
-            "version": "$VERSION",
-            "description": "Terminal database client",
-            "type": "module",
-            "repository": { "type": "git", "url": "git+https://github.com/Tranthanh98/query-cli.git" },
+             "name": "query-cli",
+             "version": "$VERSION",
+             "description": "Terminal database client",
+             "homepage": "https://tranthanh98.github.io/query-cli/",
+             "type": "module",
+             "repository": { "type": "git", "url": "git+https://github.com/Tranthanh98/query-cli.git" },
             "bin": { "query-cli": "bin/query-cli.mjs" },
             "files": ["bin"]
           }

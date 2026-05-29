@@ -1,6 +1,8 @@
-import { useKeyboard } from "@opentui/react";
+import { useTerminalDimensions } from "@opentui/react";
+import type { SelectOption } from "@opentui/core";
 import { useEffect, useState } from "react";
 import { useApp } from "../app-context";
+import { AsciiLogo } from "../components/ascii-logo";
 import { loadConnections } from "../config/connections";
 import { createDriver } from "../drivers";
 import type { ConnectionConfig } from "../drivers/types";
@@ -11,12 +13,6 @@ type Choice =
   | { kind: "new" }
   | { kind: "quit" };
 
-interface OptionItem {
-  name: string;
-  description: string;
-  value: Choice;
-}
-
 export function ConnectionSelectScreen() {
   const { openDriverSelect, goMain, driverSelectOpen } = useApp();
   const [connections, setConnections] = useState<ConnectionConfig[]>([]);
@@ -25,7 +21,7 @@ export function ConnectionSelectScreen() {
     color: colors.textDim,
   });
   const [loaded, setLoaded] = useState(false);
-  const [selectedIndex, setSelectedIndex] = useState(0);
+  const { height } = useTerminalDimensions();
 
   useEffect(() => {
     loadConnections().then((conns) => {
@@ -34,7 +30,7 @@ export function ConnectionSelectScreen() {
     });
   }, []);
 
-  const options: OptionItem[] = [
+  const options: SelectOption[] = [
     ...connections.map((c) => ({
       name: c.name,
       description: describe(c),
@@ -52,7 +48,9 @@ export function ConnectionSelectScreen() {
     },
   ];
 
-  const handleSelect = async (choice: Choice) => {
+  const handleSelect = async (_idx: number, opt: SelectOption | null) => {
+    if (!opt) return;
+    const choice = opt.value as Choice;
     if (choice.kind === "quit") {
       process.exit(0);
     } else if (choice.kind === "new") {
@@ -75,18 +73,10 @@ export function ConnectionSelectScreen() {
     }
   };
 
-  useKeyboard((key) => {
-    if (driverSelectOpen) return;
-    if (!loaded || options.length === 0) return;
-    if (key.name === "up" || key.name === "k") {
-      setSelectedIndex((i) => (i - 1 + options.length) % options.length);
-    } else if (key.name === "down" || key.name === "j") {
-      setSelectedIndex((i) => (i + 1) % options.length);
-    } else if (key.name === "return") {
-      const opt = options[Math.min(selectedIndex, options.length - 1)];
-      if (opt) handleSelect(opt.value);
-    }
-  });
+  const selectHeight = Math.min(
+    Math.max(8, options.length + 2),
+    Math.max(8, height - 12),
+  );
 
   return (
     <box
@@ -97,6 +87,8 @@ export function ConnectionSelectScreen() {
       height="100%"
       padding={2}
     >
+      <AsciiLogo />
+
       <box
         borderStyle="rounded"
         borderColor={colors.title}
@@ -106,6 +98,7 @@ export function ConnectionSelectScreen() {
         titleAlignment="left"
         flexDirection="column"
         gap={1}
+        marginTop={1}
       >
         <text fg={colors.section}>Select a connection</text>
         <box flexDirection="row" gap={1}>
@@ -118,32 +111,19 @@ export function ConnectionSelectScreen() {
           <text fg={colors.command}>ctrl+c</text>
           <text fg={colors.textDim}>quit</text>
         </box>
-        {loaded && (
-          <box flexDirection="column" width={70}>
-            {options.map((opt, i) => {
-              const isSelected = i === selectedIndex;
-              return (
-                <box
-                  key={`${opt.name}-${i}`}
-                  border={["left"]}
-                  borderStyle="heavy"
-                  borderColor={isSelected ? colors.success : "transparent"}
-                  paddingX={1}
-                  flexDirection="column"
-                  backgroundColor={isSelected ? colors.selectedBg : undefined}
-                  onMouseDown={() => {
-                    setSelectedIndex(i);
-                    handleSelect(opt.value);
-                  }}
-                >
-                  <text fg={isSelected ? colors.selectedFg : colors.text}>
-                    {opt.name}
-                  </text>
-                  <text fg={colors.textDim}>{opt.description}</text>
-                </box>
-              );
-            })}
-          </box>
+        {loaded ? (
+          <select
+            width={70}
+            height={selectHeight}
+            options={options}
+            wrapSelection
+            focused={!driverSelectOpen}
+            selectedBackgroundColor={colors.selectedBg}
+            selectedTextColor={colors.selectedFg}
+            onSelect={handleSelect}
+          />
+        ) : (
+          <text fg={colors.textDim}>Loading connections...</text>
         )}
         {status.text ? <text fg={status.color}>{status.text}</text> : null}
       </box>

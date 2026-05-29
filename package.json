@@ -2,6 +2,7 @@
   "name": "query-cli",
   "version": "1.0.6",
   "description": "Terminal database client",
+  "homepage": "https://tranthanh98.github.io/query-cli/",
   "type": "module",
   "module": "src/index.tsx",
   "bin": {
