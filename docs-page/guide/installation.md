@@ -44,6 +44,23 @@ bun install
 bun run start
 ```
 
+## First Launch
+
+After installation, simply run:
+
+```bash
+query-cli
+```
+
+You'll land on the connection selection screen. From there:
+
+1. Select **+ New connection**
+2. Pick your database driver
+3. Fill in connection details
+4. Start querying
+
+<ConnectionSelectDemo />
+
 ## Configuration files
 
 Saved connections and queries are stored in:
@@ -55,3 +72,9 @@ Saved connections and queries are stored in:
 ```
 
 AI provider settings are configured in-app via the **AI Config** modal (`Ctrl + P` → "Configure AI").
+
+See the [Configuration](./configuration.md) page for more details.
+
+<script setup>
+import ConnectionSelectDemo from '../.vitepress/theme/components/ConnectionSelectDemo.vue'
+</script>

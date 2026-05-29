@@ -10,8 +10,8 @@ hero:
       text: Get Started
       link: /guide/introduction
     - theme: alt
-      text: Installation
-      link: /guide/installation
+      text: View on GitHub
+      link: https://github.com/Tranthanh98/query-cli
 
 features:
   - icon: 🖥️
@@ -33,3 +33,56 @@ features:
     title: Slash Commands
     details: Quick actions like /export, /clear, /quit, and more right inside the editor.
 ---
+
+<script setup>
+import ConnectionSelectDemo from './.vitepress/theme/components/ConnectionSelectDemo.vue'
+import ConnectionFormDemo from './.vitepress/theme/components/ConnectionFormDemo.vue'
+import MainScreenDemo from './.vitepress/theme/components/MainScreenDemo.vue'
+import CommandPaletteDemo from './.vitepress/theme/components/CommandPaletteDemo.vue'
+import HelpModalDemo from './.vitepress/theme/components/HelpModalDemo.vue'
+import AiConfigDemo from './.vitepress/theme/components/AiConfigDemo.vue'
+</script>
+
+<div style="margin-top: 40px;">
+
+## See it in action
+
+### Connection Manager
+
+Select, create, and manage your database connections from a clean terminal interface.
+
+<ConnectionSelectDemo />
+
+<ConnectionFormDemo />
+
+### Main Interface
+
+The main screen splits into a schema explorer, query editor, and result panel — all inside your terminal.
+
+<MainScreenDemo />
+
+### Command Palette
+
+Access every feature through the searchable command palette.
+
+<CommandPaletteDemo />
+
+### Keyboard Help
+
+Never forget a shortcut. Press `F1` or `Ctrl+H` anytime.
+
+<HelpModalDemo />
+
+### AI Configuration
+
+Configure AI providers directly in the app — no manual file editing needed.
+
+<AiConfigDemo />
+
+</div>
+
+<style scoped>
+.VPFeatures {
+  margin-top: 40px !important;
+}
+</style>

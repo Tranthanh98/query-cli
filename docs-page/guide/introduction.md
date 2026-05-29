@@ -2,6 +2,8 @@
 
 **query-cli** is a terminal database client designed for developers who prefer staying in the terminal. It combines a fast, keyboard-driven TUI with powerful features like multi-connection management, a built-in query editor, schema exploration, and AI-assisted SQL generation.
 
+<ConnectionSelectDemo />
+
 ## Why query-cli?
 
 - **All-in-one terminal workflow** — no need to switch to a GUI tool or web interface.
@@ -33,3 +35,7 @@
 - **AI Providers** — Modular integrations for Anthropic, Google, OpenAI, and OpenRouter.
 
 See the [Installation](./installation.md) page for detailed setup instructions.
+
+<script setup>
+import ConnectionSelectDemo from '../.vitepress/theme/components/ConnectionSelectDemo.vue'
+</script>
