@@ -1,4 +1,5 @@
 <template>
+  <div :key="tick">
   <TerminalWindow title="query-cli" width="100%" height="280px" minHeight="240px">
     <div class="hero-tui">
       <!-- Header Bar -->
@@ -10,7 +11,7 @@
           <span class="hero-driver">(postgres)</span>
         </div>
         <div class="hero-header-right">
-          <span class="hero-run-btn">▶ Run</span>
+          <span class="hero-run-btn" :class="{ 'hero-run-active': runActive }">▶ Run</span>
         </div>
       </div>
 
@@ -20,24 +21,26 @@
           <span class="hero-editor-accent">Active users</span>
         </div>
         <div class="hero-editor-content">
+          <!-- Line 1 -->
           <div class="hero-sql-line">
-            <span class="hero-sql-keyword">SELECT</span>
-            <span class="hero-sql-normal"> id, name, email </span>
-            <span class="hero-sql-keyword">FROM</span>
-            <span class="hero-sql-normal"> users</span>
+            <span class="hero-token" style="--d: 0.0s"><span class="hero-sql-keyword">SELECT</span></span>
+            <span class="hero-token" style="--d: 0.4s"><span class="hero-sql-normal"> id, name, email </span></span>
+            <span class="hero-token" style="--d: 0.8s"><span class="hero-sql-keyword">FROM</span></span>
+            <span class="hero-token" style="--d: 1.0s"><span class="hero-sql-normal"> users</span></span>
+            <span class="hero-cursor" :class="{ 'hero-cursor-done': cursorDone }">▌</span>
           </div>
+          <!-- Line 2 -->
           <div class="hero-sql-line">
-            <span class="hero-sql-keyword">WHERE</span>
-            <span class="hero-sql-normal"> active </span>
-            <span class="hero-sql-operator">=</span>
-            <span class="hero-sql-bool"> true</span>
-            <span class="hero-cursor">▌</span>
+            <span class="hero-token" style="--d: 1.4s"><span class="hero-sql-keyword">WHERE</span></span>
+            <span class="hero-token" style="--d: 1.7s"><span class="hero-sql-normal"> active </span></span>
+            <span class="hero-token" style="--d: 2.0s"><span class="hero-sql-operator">=</span></span>
+            <span class="hero-token" style="--d: 2.2s"><span class="hero-sql-bool"> true</span></span>
           </div>
         </div>
       </div>
 
       <!-- Result -->
-      <div class="hero-result">
+      <div class="hero-result" :class="{ 'hero-result-visible': resultVisible }">
         <div class="hero-result-title">
           <span class="hero-result-accent">Result</span>
         </div>
@@ -51,32 +54,59 @@
               </tr>
             </thead>
             <tbody>
-              <tr>
+              <tr class="hero-row" style="--rd: 0.0s">
                 <td>1</td>
                 <td>Alice</td>
                 <td>alice@example.com</td>
               </tr>
-              <tr>
+              <tr class="hero-row" style="--rd: 0.08s">
                 <td>2</td>
                 <td>Bob</td>
                 <td>bob@example.com</td>
               </tr>
-              <tr class="hero-row-more">
+              <tr class="hero-row-more" style="--rd: 0.16s">
                 <td colspan="3">… 18 more rows</td>
               </tr>
             </tbody>
           </table>
-          <div class="hero-result-meta">
+          <div class="hero-result-meta" :class="{ 'hero-meta-visible': resultVisible }">
             <span class="hero-meta-ok">✓ 20 rows · 42 ms</span>
           </div>
         </div>
       </div>
     </div>
   </TerminalWindow>
+  </div>
 </template>
 
 <script setup>
+import { ref, onMounted, onUnmounted } from "vue";
 import TerminalWindow from "./TerminalWindow.vue";
+
+const runActive = ref(false);
+const resultVisible = ref(false);
+const cursorDone = ref(false);
+const tick = ref(0);
+let intervalId;
+
+onMounted(() => {
+  intervalId = setInterval(() => tick.value++, 6000);
+
+  // After typing finishes (~2.5s), flash the Run button
+  setTimeout(() => {
+    runActive.value = true;
+    cursorDone.value = true;
+  }, 2500);
+
+  // Show result panel after Run flash
+  setTimeout(() => {
+    resultVisible.value = true;
+  }, 2800);
+});
+
+onUnmounted(() => {
+  clearInterval(intervalId);
+});
 </script>
 
 <style scoped>
@@ -131,6 +161,12 @@ import TerminalWindow from "./TerminalWindow.vue";
   border-radius: 3px;
   font-size: 11px;
   font-weight: 500;
+  transition: background 0.2s, color 0.2s;
+}
+
+.hero-run-active {
+  background: var(--tui-command);
+  color: var(--tui-surface);
 }
 
 .hero-editor {
@@ -176,6 +212,24 @@ import TerminalWindow from "./TerminalWindow.vue";
   align-items: center;
 }
 
+/* Typing animation for each token */
+.hero-token {
+  opacity: 0;
+  animation: typeIn 0.15s ease forwards;
+  animation-delay: var(--d);
+}
+
+@keyframes typeIn {
+  from {
+    opacity: 0;
+    transform: translateY(1px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .hero-sql-keyword {
   color: var(--tui-panel-query);
   font-weight: 600;
@@ -196,11 +250,32 @@ import TerminalWindow from "./TerminalWindow.vue";
 .hero-cursor {
   color: var(--tui-text);
   animation: blink 1s step-end infinite;
+  opacity: 0;
+  animation-delay: 2.5s;
+  animation-name: blink, showCursor;
+  animation-duration: 1s, 0.1s;
+  animation-timing-function: step-end, ease;
+  animation-iteration-count: infinite, 1;
+  animation-fill-mode: both, forwards;
+}
+
+.hero-cursor-done {
+  animation: blink 1s step-end infinite;
+  opacity: 1;
 }
 
 @keyframes blink {
   50% {
     opacity: 0;
+  }
+}
+
+@keyframes showCursor {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
   }
 }
 
@@ -215,6 +290,14 @@ import TerminalWindow from "./TerminalWindow.vue";
   position: relative;
   min-height: 0;
   overflow: hidden;
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+.hero-result-visible {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 .hero-result-title {
@@ -263,16 +346,49 @@ import TerminalWindow from "./TerminalWindow.vue";
   color: var(--tui-text);
 }
 
+/* Table rows stagger in */
+.hero-row {
+  opacity: 0;
+  transform: translateX(-8px);
+  animation: rowSlideIn 0.3s ease forwards;
+  animation-delay: calc(2.9s + var(--rd));
+}
+
 .hero-row-more td {
   color: var(--tui-text-dim);
   text-align: center;
   border-top: 1px dashed var(--tui-border);
 }
 
+.hero-row-more {
+  opacity: 0;
+  animation: rowSlideIn 0.3s ease forwards;
+  animation-delay: calc(2.9s + var(--rd));
+}
+
+@keyframes rowSlideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
 .hero-result-meta {
   margin-top: auto;
   text-align: right;
   padding-top: 2px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  transition-delay: 0s;
+}
+
+.hero-meta-visible {
+  opacity: 1;
+  transition-delay: 3.2s;
 }
 
 .hero-meta-ok {
