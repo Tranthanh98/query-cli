@@ -1,5 +1,5 @@
-import DefaultTheme from "vitepress/theme";
 import { useData } from "vitepress";
+import DefaultTheme from "vitepress/theme";
 import { h } from "vue";
 import AiConfigDemo from "./components/AiConfigDemo.vue";
 import CommandPaletteDemo from "./components/CommandPaletteDemo.vue";
@@ -20,7 +20,11 @@ export default {
       "home-hero-image": () => h(HeroTerminal),
       "home-hero-info-before": () =>
         h("div", { class: "hero-icon-wrapper" }, [
-          h("img", { src: base + "icon.png", class: "hero-icon", alt: "query-cli" }),
+          h("img", {
+            src: base + "icon.png",
+            class: "hero-icon",
+            alt: "query-cli",
+          }),
         ]),
     });
   },

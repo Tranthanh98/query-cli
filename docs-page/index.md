@@ -2,7 +2,7 @@
 layout: home
 
 hero:
-  name: query-cli
+  name: ">_ query_cli"
   text: Terminal Database Client
   tagline: A keyboard-driven TUI with multi-connection support, query editor, schema explorer, and built-in AI assistance.
   actions:
