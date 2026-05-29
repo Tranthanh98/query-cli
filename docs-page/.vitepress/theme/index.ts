@@ -1,7 +1,7 @@
 import { useData } from "vitepress";
 import DefaultTheme from "vitepress/theme";
 import { h } from "vue";
-import AiConfigDemo from "./components/AiConfigDemo.vue";
+import AiDemo from "./components/AiDemo.vue";
 import CommandPaletteDemo from "./components/CommandPaletteDemo.vue";
 import ConnectionFormDemo from "./components/ConnectionFormDemo.vue";
 import ConnectionSelectDemo from "./components/ConnectionSelectDemo.vue";
@@ -36,6 +36,6 @@ export default {
     app.component("CommandPaletteDemo", CommandPaletteDemo);
     app.component("ConnectionSelectDemo", ConnectionSelectDemo);
     app.component("HelpModalDemo", HelpModalDemo);
-    app.component("AiConfigDemo", AiConfigDemo);
+    app.component("AiDemo", AiDemo);
   },
 };

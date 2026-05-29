@@ -40,7 +40,7 @@ import ConnectionFormDemo from './.vitepress/theme/components/ConnectionFormDemo
 import MainScreenDemo from './.vitepress/theme/components/MainScreenDemo.vue'
 import CommandPaletteDemo from './.vitepress/theme/components/CommandPaletteDemo.vue'
 import HelpModalDemo from './.vitepress/theme/components/HelpModalDemo.vue'
-import AiConfigDemo from './.vitepress/theme/components/AiConfigDemo.vue'
+import AiDemo from './.vitepress/theme/components/AiDemo.vue'
 </script>
 
 <div style="margin-top: 40px;">
@@ -75,7 +75,7 @@ Access every feature through the searchable command palette. Never forget a shor
 
 Configure AI providers directly in the app — no manual file editing needed.
 
-<AiConfigDemo />
+<AiDemo />
 
 </div>
 

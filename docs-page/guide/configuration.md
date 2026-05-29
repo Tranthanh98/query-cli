@@ -69,7 +69,7 @@ The recommended way to configure AI is through the app:
 3. Choose your provider
 4. Enter API key and model
 
-<AiConfigDemo />
+<AiDemo />
 
 ## Terminal Settings
 
@@ -90,5 +90,5 @@ query-cli supports mouse interaction in terminals that have it enabled. This let
 - Click table names in the explorer
 
 <script setup>
-import AiConfigDemo from '../.vitepress/theme/components/AiConfigDemo.vue'
+import AiDemo from '../.vitepress/theme/components/AiDemo.vue'
 </script>

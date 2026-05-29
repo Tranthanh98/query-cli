@@ -2,7 +2,7 @@
 
 query-cli supports multiple AI providers for generating and explaining SQL directly inside the editor.
 
-<AiConfigDemo />
+<AiDemo />
 
 ## Supported Providers
 
@@ -76,5 +76,5 @@ API keys are stored locally in your config directory (`~/.config/query-cli/`). T
 | Model not responding | Check your API key and internet connection |
 
 <script setup>
-import AiConfigDemo from '../.vitepress/theme/components/AiConfigDemo.vue'
+import AiDemo from '../.vitepress/theme/components/AiDemo.vue'
 </script>

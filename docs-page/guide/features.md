@@ -41,7 +41,7 @@ Get help writing SQL from leading AI providers:
 
 Type `@ai:` followed by your request in the editor, press Enter, and watch AI generate SQL for you.
 
-<AiConfigDemo />
+<AiDemo />
 
 ## Command Palette
 
@@ -79,5 +79,5 @@ import ConnectionFormDemo from '../.vitepress/theme/components/ConnectionFormDem
 import MainScreenDemo from '../.vitepress/theme/components/MainScreenDemo.vue'
 import CommandPaletteDemo from '../.vitepress/theme/components/CommandPaletteDemo.vue'
 import HelpModalDemo from '../.vitepress/theme/components/HelpModalDemo.vue'
-import AiConfigDemo from '../.vitepress/theme/components/AiConfigDemo.vue'
+import AiDemo from '../.vitepress/theme/components/AiDemo.vue'
 </script>
