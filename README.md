@@ -4,6 +4,7 @@ A terminal database client with a keyboard-driven TUI, multi-connection support,
 
 ![Bun](https://img.shields.io/badge/Bun-000000?logo=bun&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=white)
+[![npm](https://img.shields.io/npm/v/query-cli?label=npm&logo=npm)](https://www.npmjs.com/package/query-cli)
 
 ## Features
 
@@ -18,10 +19,28 @@ A terminal database client with a keyboard-driven TUI, multi-connection support,
 ## Install
 
 ```bash
+# npm
 npm i -g query-cli
+
+# pnpm
+pnpm add -g query-cli
+
+# yarn
+yarn global add query-cli
+
+# bun
+bun add -g query-cli
+```
+
+Or run once without installing:
+
+```bash
+npx query-cli
 ```
 
 `query-cli` is distributed as a self-contained binary per platform, so you don't need Bun or Node.js installed.
+
+> **Homebrew** and **Winget** distribution is planned. See [PUBLISHING.md](./PUBLISHING.md) for the current npm-based distribution model.
 
 ## Usage
 
@@ -47,42 +66,6 @@ On first launch, you'll land on the **connection selection** screen. Add a new c
 > **Note:** `Ctrl+S` may freeze some Unix terminals (XOFF). Press `Ctrl+Q` to resume, or disable flow control with `stty -ixon`.
 
 > Tab management (new, switch, save, rename, delete) and other actions are available through slash commands in the editor — type `/` to see the list.
-
-## Development
-
-query-cli requires [Bun](https://bun.com). It uses OpenTUI's native Zig libraries and will not run on Node.js.
-
-```bash
-# Install dependencies
-bun install
-
-# Run in watch mode
-bun run dev
-
-# Run once
-bun run start
-
-# Type check
-bun run typecheck
-
-# Compile standalone binary
-bun run compile
-```
-
-## Project Structure
-
-```
-src/
-├── drivers/          # Database drivers (postgres, sqlite, mysql)
-├── screens/          # TUI screens (connection select, form, main, modals)
-├── components/       # Reusable TUI components (editor, result panel, etc.)
-├── commands/         # Slash command registry
-├── ai/               # AI provider adapters (anthropic, openai, gemini, openrouter)
-├── config/           # Connection and query persistence
-├── lib/              # Utilities (clipboard, etc.)
-├── app.tsx           # Root app with screen router
-└── index.tsx         # Entry point
-```
 
 ## Configuration
 
