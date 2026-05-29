@@ -51,9 +51,10 @@ import AiConfigDemo from './.vitepress/theme/components/AiConfigDemo.vue'
 
 Select, create, and manage your database connections from a clean terminal interface.
 
-<ConnectionSelectDemo />
-
-<ConnectionFormDemo />
+<div class="terminal-grid">
+  <ConnectionSelectDemo />
+  <ConnectionFormDemo />
+</div>
 
 ### Main Interface
 
@@ -61,17 +62,14 @@ The main screen splits into a schema explorer, query editor, and result panel â€
 
 <MainScreenDemo />
 
-### Command Palette
+### Command Palette & Help
 
-Access every feature through the searchable command palette.
+Access every feature through the searchable command palette. Never forget a shortcut â€” press `F1` or `Ctrl+H` anytime.
 
-<CommandPaletteDemo />
-
-### Keyboard Help
-
-Never forget a shortcut. Press `F1` or `Ctrl+H` anytime.
-
-<HelpModalDemo />
+<div class="terminal-grid">
+  <CommandPaletteDemo />
+  <HelpModalDemo />
+</div>
 
 ### AI Configuration
 
