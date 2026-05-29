@@ -160,12 +160,14 @@ jobs:
           }
           EOF
 
-      - name: Debug npm auth
-        run: |
-          npm config list
-          npm whoami 2>/dev/null || echo "npm whoami failed (expected if no classic token)"
-          cat .npmrc 2>/dev/null || echo "No .npmrc in repo root"
-
-      - name: Publish main package
+      - name: Publish with OIDC provenance
+        id: publish_oidc
         run: npm publish --access public --provenance
         working-directory: dist/query-cli
+
+      - name: Publish with NPM_TOKEN (fallback)
+        if: failure() && steps.publish_oidc.outcome == 'failure'
+        run: npm publish --access public
+        working-directory: dist/query-cli
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
