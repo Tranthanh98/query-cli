@@ -1,4 +1,4 @@
-import { useTerminalDimensions } from "@opentui/react";
+import { useKeyboard, useTerminalDimensions } from "@opentui/react";
 import type { SelectOption } from "@opentui/core";
 import { useEffect, useState } from "react";
 import { useApp } from "../app-context";
@@ -13,6 +13,8 @@ type Choice =
   | { kind: "new" }
   | { kind: "quit" };
 
+const ITEM_HEIGHT = 2;
+
 export function ConnectionSelectScreen() {
   const { openDriverSelect, goMain, driverSelectOpen } = useApp();
   const [connections, setConnections] = useState<ConnectionConfig[]>([]);
@@ -22,6 +24,7 @@ export function ConnectionSelectScreen() {
   });
   const [loaded, setLoaded] = useState(false);
   const { height } = useTerminalDimensions();
+  const [selectedIndex, setSelectedIndex] = useState(0);
 
   useEffect(() => {
     loadConnections().then((conns) => {
@@ -48,9 +51,7 @@ export function ConnectionSelectScreen() {
     },
   ];
 
-  const handleSelect = async (_idx: number, opt: SelectOption | null) => {
-    if (!opt) return;
-    const choice = opt.value as Choice;
+  const executeChoice = async (choice: Choice) => {
     if (choice.kind === "quit") {
       process.exit(0);
     } else if (choice.kind === "new") {
@@ -73,10 +74,41 @@ export function ConnectionSelectScreen() {
     }
   };
 
+  const handleSelect = (idx: number) => {
+    const opt = options[idx];
+    if (!opt) return;
+    const choice = opt.value as Choice;
+    void executeChoice(choice);
+  };
+
+  useKeyboard((key) => {
+    if (driverSelectOpen) return;
+    if (options.length === 0) return;
+
+    if (key.name === "up") {
+      setSelectedIndex((i) => (i - 1 + options.length) % options.length);
+    } else if (key.name === "down") {
+      setSelectedIndex((i) => (i + 1) % options.length);
+    } else if (key.name === "return" || key.name === "enter") {
+      handleSelect(selectedIndex);
+    }
+  });
+
   const selectHeight = Math.min(
-    Math.max(8, options.length + 2),
+    Math.max(8, options.length * ITEM_HEIGHT + 2),
     Math.max(8, height - 12),
   );
+
+  const maxVisibleItems = Math.max(3, Math.floor(selectHeight / ITEM_HEIGHT));
+
+  const windowStart = Math.max(
+    0,
+    Math.min(
+      selectedIndex - Math.floor(maxVisibleItems / 2),
+      Math.max(0, options.length - maxVisibleItems),
+    ),
+  );
+  const visibleOptions = options.slice(windowStart, windowStart + maxVisibleItems);
 
   return (
     <box
@@ -112,16 +144,37 @@ export function ConnectionSelectScreen() {
           <text fg={colors.textDim}>quit</text>
         </box>
         {loaded ? (
-          <select
+          <box
+            flexDirection="column"
             width={70}
-            height={selectHeight}
-            options={options}
-            wrapSelection
-            focused={!driverSelectOpen}
-            selectedBackgroundColor={colors.selectedBg}
-            selectedTextColor={colors.selectedFg}
-            onSelect={handleSelect}
-          />
+            maxHeight={maxVisibleItems * ITEM_HEIGHT}
+          >
+            {visibleOptions.map((opt, i) => {
+              const absoluteIndex = windowStart + i;
+              const isSelected = absoluteIndex === selectedIndex;
+              return (
+                <box
+                  key={opt.name + absoluteIndex}
+                  height={ITEM_HEIGHT}
+                  border={["left"]}
+                  borderStyle="heavy"
+                  borderColor={isSelected ? colors.command : "transparent"}
+                  paddingX={1}
+                  flexDirection="column"
+                  backgroundColor={isSelected ? colors.selectedBg : undefined}
+                  onMouseDown={() => {
+                    setSelectedIndex(absoluteIndex);
+                    handleSelect(absoluteIndex);
+                  }}
+                >
+                  <text fg={isSelected ? colors.selectedFg : colors.text}>
+                    {opt.name}
+                  </text>
+                  <text fg={colors.textDim}>{opt.description}</text>
+                </box>
+              );
+            })}
+          </box>
         ) : (
           <text fg={colors.textDim}>Loading connections...</text>
         )}

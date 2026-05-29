@@ -44,3 +44,27 @@ There are **no tests, no linter, and no formatter** in this repo.
 - **Release trigger:** push a `v*` tag, or run the `Release` workflow manually. Uses npm Trusted Publishing (OIDC) — no `NPM_TOKEN` needed.
 - CI uses `bun install --frozen-lockfile` on each platform runner to ensure the matching OpenTUI native library is embedded.
 - See `PUBLISHING.md` for full details.
+
+## Auto-updater
+
+The app checks GitHub Releases on startup (after a short delay so the TUI is
+already rendered). If a newer version exists, it shows a confirmation modal
+via the existing `ConfirmModal` + `requestConfirm` flow. When the user
+confirms:
+
+1. The app downloads the matching platform asset from the latest release.
+2. **macOS / Linux:** overwrites the running binary directly (`Bun.write`),
+   fixes executable permissions, and calls `process.exit(0)`.
+3. **Windows:** writes the new binary next to the locked `.exe`, spawns a
+detached PowerShell script that waits briefly, swaps the files, and then the
+app calls `process.exit(0)`.
+
+The version used for comparison is imported from `package.json` and inlined by
+`bun build --compile`, so the binary is self-aware. During development
+(`bun run`) the updater still queries the API, but `performUpdate` refuses to
+self-replace because `process.execPath` points to the `bun` executable rather
+than a compiled binary.
+
+Relevant files:
+- `src/updater.ts` — check, download, and replace logic.
+- `src/app.tsx` — `UpdateChecker` component wired into the app tree.
