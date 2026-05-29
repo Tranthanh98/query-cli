@@ -1,6 +1,6 @@
 {
   "name": "query-cli",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "description": "Terminal database client",
   "homepage": "https://tranthanh98.github.io/query-cli/",
   "type": "module",
