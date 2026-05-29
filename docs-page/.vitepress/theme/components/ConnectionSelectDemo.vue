@@ -55,27 +55,27 @@ import TerminalWindow from "./TerminalWindow.vue";
 }
 
 .tui-box {
-  border: 1px solid #3d3d46;
+  border: 1px solid var(--tui-border-focus);
   border-radius: 8px;
   padding: 16px 20px;
-  background: #15151a;
+  background: var(--tui-surface);
   position: relative;
 }
 
 .connection-select-box {
-  border-color: #7fb3ff;
+  border-color: var(--tui-title);
 }
 
 .tui-title-bar {
   position: absolute;
   top: -10px;
   left: 16px;
-  background: #15151a;
+  background: var(--tui-surface);
   padding: 0 8px;
 }
 
 .tui-title-accent {
-  color: #7fb3ff;
+  color: var(--tui-title);
   font-size: 13px;
   font-weight: 600;
 }
@@ -86,7 +86,7 @@ import TerminalWindow from "./TerminalWindow.vue";
 }
 
 .tui-select-label {
-  color: #b197e6;
+  color: var(--tui-section);
   font-size: 13px;
 }
 
@@ -99,15 +99,15 @@ import TerminalWindow from "./TerminalWindow.vue";
 }
 
 .tui-hint-key {
-  color: #f0b458;
+  color: var(--tui-command);
 }
 
 .tui-hint-text {
-  color: #7a7a82;
+  color: var(--tui-text-dim);
 }
 
 .tui-hint-sep {
-  color: #4a4a52;
+  color: var(--tui-text-muted);
 }
 
 .tui-connection-list {
@@ -124,21 +124,21 @@ import TerminalWindow from "./TerminalWindow.vue";
 }
 
 .tui-conn-selected {
-  border-left-color: #8fe388;
-  background: #2c2317;
+  border-left-color: var(--tui-success);
+  background: var(--tui-selected-bg);
 }
 
 .tui-conn-name {
-  color: #e6e6e6;
+  color: var(--tui-text);
   font-size: 13px;
 }
 
 .tui-conn-selected .tui-conn-name {
-  color: #f0b458;
+  color: var(--tui-command);
 }
 
 .tui-conn-desc {
-  color: #7a7a82;
+  color: var(--tui-text-dim);
   font-size: 11px;
   margin-top: 2px;
 }

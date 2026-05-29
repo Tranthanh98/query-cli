@@ -52,29 +52,29 @@ import TerminalWindow from "./TerminalWindow.vue";
 }
 
 .tui-modal {
-  border: 1px solid #b197e6;
+  border: 1px solid var(--tui-border-focus);
   border-radius: 8px;
   padding: 16px 20px;
-  background: #15151a;
+  background: var(--tui-surface);
   position: relative;
   min-width: 480px;
   max-width: 580px;
 }
 
 .ai-config-modal {
-  border-color: #b197e6;
+  border-color: var(--tui-panel-query);
 }
 
 .tui-modal-title-bar {
   position: absolute;
   top: -10px;
   left: 16px;
-  background: #15151a;
+  background: var(--tui-surface);
   padding: 0 8px;
 }
 
 .tui-modal-title-accent {
-  color: #b197e6;
+  color: var(--tui-panel-query);
   font-size: 13px;
 }
 
@@ -87,15 +87,15 @@ import TerminalWindow from "./TerminalWindow.vue";
 }
 
 .tui-hint-key {
-  color: #f0b458;
+  color: var(--tui-command);
 }
 
 .tui-hint-text {
-  color: #7a7a82;
+  color: var(--tui-text-dim);
 }
 
 .tui-hint-sep {
-  color: #4a4a52;
+  color: var(--tui-text-muted);
 }
 
 .tui-adapter-list {
@@ -111,21 +111,21 @@ import TerminalWindow from "./TerminalWindow.vue";
 }
 
 .tui-adapter-selected {
-  border-left-color: #b197e6;
-  background: #2c2317;
+  border-left-color: var(--tui-panel-query);
+  background: var(--tui-selected-bg);
 }
 
 .tui-adapter-name {
-  color: #e6e6e6;
+  color: var(--tui-text);
   font-size: 13px;
 }
 
 .tui-adapter-selected .tui-adapter-name {
-  color: #f0b458;
+  color: var(--tui-command);
 }
 
 .tui-adapter-desc {
-  color: #7a7a82;
+  color: var(--tui-text-dim);
   font-size: 11px;
   margin-top: 3px;
 }

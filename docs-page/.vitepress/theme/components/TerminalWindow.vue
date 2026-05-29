@@ -36,8 +36,8 @@ const bodyStyle = computed(() => ({
 .terminal-window {
   border-radius: 10px;
   overflow: hidden;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.06);
-  background: #0e0e10;
+  box-shadow: 0 20px 60px var(--tui-shadow), 0 0 0 1px var(--tui-border);
+  background: var(--tui-bg);
   margin: 1.5rem 0;
   font-family: "SF Mono", "Fira Code", "JetBrains Mono", "Cascadia Code",
     "Consolas", "Monaco", "Courier New", monospace;
@@ -50,8 +50,8 @@ const bodyStyle = computed(() => ({
   align-items: center;
   gap: 8px;
   padding: 10px 14px;
-  background: linear-gradient(180deg, #2a2a2e 0%, #1e1e22 100%);
-  border-bottom: 1px solid #26262c;
+  background: linear-gradient(180deg, var(--tui-chrome-bg) 0%, var(--tui-surface) 100%);
+  border-bottom: 1px solid var(--tui-chrome-border);
 }
 
 .terminal-dots {
@@ -81,7 +81,7 @@ const bodyStyle = computed(() => ({
 }
 
 .terminal-title {
-  color: #a0a0a8;
+  color: var(--tui-text-dim);
   font-size: 12px;
   font-weight: 500;
   flex-shrink: 0;
@@ -93,8 +93,8 @@ const bodyStyle = computed(() => ({
 }
 
 .terminal-body {
-  background: #0e0e10;
-  color: #e6e6e6;
+  background: var(--tui-bg);
+  color: var(--tui-text);
   overflow: auto;
 }
 </style>

@@ -5,6 +5,7 @@ export default defineConfig({
   title: "query-cli",
   description: "A terminal database client with a keyboard-driven TUI and built-in AI assistance",
   ignoreDeadLinks: true,
+  appearance: true,
   head: [
     ["link", { rel: "preconnect", href: "https://fonts.googleapis.com" }],
     ["link", { rel: "preconnect", href: "https://fonts.gstatic.com", crossorigin: "" }],

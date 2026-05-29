@@ -1,6 +1,205 @@
-/* Custom theme enhancements for query-cli docs */
+/* ============================================================
+   query-cli docs — Light / Dark theme system
+   ============================================================ */
 
+/* ------------------------------------------------------------------
+   1. Terminal UI colour tokens (shared by all demo components)
+   ------------------------------------------------------------------ */
 :root {
+  --tui-bg: #ffffff;
+  --tui-surface: #f5f5f7;
+  --tui-surface-alt: #ffffff;
+  --tui-text: #1d1d1f;
+  --tui-text-dim: #6e6e73;
+  --tui-text-muted: #a1a1a6;
+  --tui-border: #d2d2d7;
+  --tui-border-focus: #86868b;
+  --tui-title: #0066cc;
+  --tui-section: #7b5aa6;
+  --tui-command: #b37400;
+  --tui-warning: #b37400;
+  --tui-success: #2d8a3e;
+  --tui-error: #d93025;
+  --tui-panel-queries: #2d8a6e;
+  --tui-panel-query: #7b5aa6;
+  --tui-panel-result: #0066cc;
+  --tui-selected-fg: #b37400;
+  --tui-selected-bg: #fef3e2;
+  --tui-chrome-bg: #e8e8ed;
+  --tui-chrome-border: #d2d2d7;
+  --tui-shadow: rgba(0, 0, 0, 0.12);
+}
+
+html.dark {
+  --tui-bg: #0e0e10;
+  --tui-surface: #15151a;
+  --tui-surface-alt: #1a1a1f;
+  --tui-text: #e6e6e6;
+  --tui-text-dim: #7a7a82;
+  --tui-text-muted: #4a4a52;
+  --tui-border: #26262c;
+  --tui-border-focus: #3d3d46;
+  --tui-title: #7fb3ff;
+  --tui-section: #b197e6;
+  --tui-command: #f0b458;
+  --tui-warning: #f0b458;
+  --tui-success: #8fe388;
+  --tui-error: #ff7b7b;
+  --tui-panel-queries: #6ec4b5;
+  --tui-panel-query: #b197e6;
+  --tui-panel-result: #7fb3ff;
+  --tui-selected-fg: #f0b458;
+  --tui-selected-bg: #2c2317;
+  --tui-chrome-bg: #2a2a2e;
+  --tui-chrome-border: #26262c;
+  --tui-shadow: rgba(0, 0, 0, 0.5);
+}
+
+/* ------------------------------------------------------------------
+   2. VitePress overrides — Light (default)
+   ------------------------------------------------------------------ */
+:root {
+  --vp-c-brand-1: #0066cc;
+  --vp-c-brand-2: #0052a3;
+  --vp-c-brand-3: #0066cc;
+  --vp-c-brand-soft: rgba(0, 102, 204, 0.12);
+
+  --vp-c-bg: #ffffff;
+  --vp-c-bg-alt: #f5f5f7;
+  --vp-c-bg-elv: #ffffff;
+  --vp-c-bg-soft: #f5f5f7;
+
+  --vp-c-text-1: #1d1d1f;
+  --vp-c-text-2: #424245;
+  --vp-c-text-3: #6e6e73;
+
+  --vp-c-border: #d2d2d7;
+  --vp-c-divider: #e8e8ed;
+  --vp-c-gutter: #f5f5f7;
+}
+
+.vp-doc a {
+  color: var(--vp-c-brand-1);
+}
+
+.vp-doc a:hover {
+  color: #004499;
+}
+
+.vp-doc h1,
+.vp-doc h2,
+.vp-doc h3 {
+  color: var(--vp-c-text-1);
+}
+
+.vp-doc h2 {
+  border-top: none;
+  border-bottom: 1px solid var(--vp-c-border);
+  padding-bottom: 0.6rem;
+}
+
+.vp-doc table {
+  border-color: var(--vp-c-border);
+}
+
+.vp-doc th {
+  background: var(--vp-c-bg-soft);
+  color: var(--vp-c-text-1);
+  border-color: var(--vp-c-border);
+}
+
+.vp-doc td {
+  border-color: var(--vp-c-border);
+}
+
+.vp-doc tr:nth-child(2n) {
+  background: #fbfbfd;
+}
+
+.vp-doc blockquote {
+  border-left: 4px solid var(--tui-command);
+  background: var(--tui-selected-bg);
+  padding: 12px 16px;
+  border-radius: 0 6px 6px 0;
+}
+
+.vp-doc blockquote p {
+  color: var(--vp-c-text-1);
+  margin: 0;
+}
+
+.VPHomeHero {
+  background: linear-gradient(180deg, #f5f5f7 0%, #ffffff 100%);
+}
+
+.VPHero .name,
+.VPHero .text {
+  background: linear-gradient(120deg, #0066cc 0%, #7b5aa6 50%, #b37400 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.VPFeature {
+  border: 1px solid var(--vp-c-border);
+  border-radius: 10px;
+  background: var(--vp-c-bg);
+  transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
+}
+
+.VPFeature:hover {
+  border-color: var(--vp-c-border-focus);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+}
+
+.VPFeature .icon {
+  font-size: 2.2rem;
+  margin-bottom: 0.5rem;
+}
+
+.VPFeature .title {
+  color: var(--vp-c-text-1);
+  font-weight: 600;
+}
+
+.VPFeature .details {
+  color: var(--vp-c-text-2);
+}
+
+.vp-code-group .tabs {
+  background: var(--vp-c-bg-soft);
+}
+
+.vp-code-group .tabs label {
+  color: var(--vp-c-text-3);
+}
+
+.vp-code-group .tabs label.active {
+  color: var(--vp-c-text-1);
+}
+
+.vp-code-group div[class*="language-"] {
+  background: #f5f5f7;
+}
+
+div[class*="language-"] pre {
+  background: #f5f5f7;
+}
+
+div[class*="language-"] code {
+  color: #1d1d1f;
+}
+
+.VPBadge {
+  border-radius: 4px;
+  font-weight: 500;
+}
+
+/* ------------------------------------------------------------------
+   3. VitePress overrides — Dark
+   ------------------------------------------------------------------ */
+html.dark {
   --vp-c-brand-1: #7fb3ff;
   --vp-c-brand-2: #6aa0ed;
   --vp-c-brand-3: #7fb3ff;
@@ -20,125 +219,101 @@
   --vp-c-gutter: #0e0e10;
 }
 
-.vp-doc a {
+html.dark .vp-doc a {
   color: #7fb3ff;
 }
 
-.vp-doc a:hover {
+html.dark .vp-doc a:hover {
   color: #a8ccff;
 }
 
-.vp-doc h1,
-.vp-doc h2,
-.vp-doc h3 {
+html.dark .vp-doc h1,
+html.dark .vp-doc h2,
+html.dark .vp-doc h3 {
   color: #e6e6e6;
 }
 
-.vp-doc h2 {
-  border-top: none;
-  border-bottom: 1px solid #26262c;
-  padding-bottom: 0.6rem;
+html.dark .vp-doc h2 {
+  border-bottom-color: #26262c;
 }
 
-.vp-doc table {
+html.dark .vp-doc table {
   border-color: #26262c;
 }
 
-.vp-doc th {
+html.dark .vp-doc th {
   background: #15151a;
   color: #e6e6e6;
   border-color: #26262c;
 }
 
-.vp-doc td {
+html.dark .vp-doc td {
   border-color: #26262c;
 }
 
-.vp-doc tr:nth-child(2n) {
+html.dark .vp-doc tr:nth-child(2n) {
   background: #111114;
 }
 
-.vp-doc blockquote {
-  border-left: 4px solid #f0b458;
+html.dark .vp-doc blockquote {
+  border-left-color: #f0b458;
   background: #2c2317;
-  padding: 12px 16px;
-  border-radius: 0 6px 6px 0;
 }
 
-.vp-doc blockquote p {
+html.dark .vp-doc blockquote p {
   color: #e6e6e6;
-  margin: 0;
 }
 
-.VPHomeHero {
+html.dark .VPHomeHero {
   background: linear-gradient(180deg, #0e0e10 0%, #0a0a0c 100%);
 }
 
-.VPHero .name,
-.VPHero .text {
+html.dark .VPHero .name,
+html.dark .VPHero .text {
   background: linear-gradient(120deg, #7fb3ff 0%, #b197e6 50%, #f0b458 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
-.VPFeature {
-  border: 1px solid #26262c;
-  border-radius: 10px;
+html.dark .VPFeature {
+  border-color: #26262c;
   background: #15151a;
-  transition: border-color 0.2s, transform 0.2s;
 }
 
-.VPFeature:hover {
+html.dark .VPFeature:hover {
   border-color: #3d3d46;
-  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
 }
 
-.VPFeature .icon {
-  font-size: 2.2rem;
-  margin-bottom: 0.5rem;
-}
-
-.VPFeature .title {
+html.dark .VPFeature .title {
   color: #e6e6e6;
-  font-weight: 600;
 }
 
-.VPFeature .details {
+html.dark .VPFeature .details {
   color: #a0a0a8;
 }
 
-.vp-code-group .tabs {
+html.dark .vp-code-group .tabs {
   background: #15151a;
 }
 
-.vp-code-group .tabs label {
+html.dark .vp-code-group .tabs label {
   color: #7a7a82;
 }
 
-.vp-code-group .tabs label.active {
+html.dark .vp-code-group .tabs label.active {
   color: #e6e6e6;
 }
 
-.vp-code-group div[class*="language-"] {
+html.dark .vp-code-group div[class*="language-"] {
   background: #0e0e10;
 }
 
-div[class*="language-"] pre {
+html.dark div[class*="language-"] pre {
   background: #0e0e10;
 }
 
-div[class*="language-"] code {
+html.dark div[class*="language-"] code {
   color: #e6e6e6;
-}
-
-/* Terminal window already has its own styles, but ensure it looks good in dark */
-.terminal-window {
-  margin: 1.5rem 0;
-}
-
-/* Custom badge styles */
-.VPBadge {
-  border-radius: 4px;
-  font-weight: 500;
 }
