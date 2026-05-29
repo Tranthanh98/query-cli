@@ -65,6 +65,7 @@ function MainScreenInner() {
     setCommands,
     goSelect,
     runSlashCommand,
+    requestConfirm,
     confirmRequest,
   } = useApp();
   const {
@@ -74,7 +75,8 @@ function MainScreenInner() {
     renameActive,
     deleteActive,
     switchTo,
-    clearActive,
+    newQuery,
+    discardUnsavedAndPersist,
     openInputPrompt,
     inputPrompt,
     openSwitchModal,
@@ -268,11 +270,22 @@ function MainScreenInner() {
       {
         name: "/exit",
         description: "Disconnect and return to connection select",
-        confirm: {
-          title: "Exit session",
-          message: "Disconnect and return to connection select?",
+        handler: () => {
+          const hasUnsaved = queries.some((q) => q.saved === false);
+          if (hasUnsaved) {
+            requestConfirm({
+              title: "Exit session",
+              message:
+                "You have unsaved queries. They will be lost if you exit.",
+              onConfirm: () => {
+                discardUnsavedAndPersist();
+                goSelect();
+              },
+            });
+          } else {
+            goSelect();
+          }
         },
-        handler: () => goSelect(),
       },
       // {
       //   name: "/undo",
@@ -300,7 +313,7 @@ function MainScreenInner() {
         name: "/new-query",
         description: "Start a new empty query",
         handler: () => {
-          clearActive(getEditorText());
+          newQuery(getEditorText());
           setEditorText("");
         },
       },
@@ -344,16 +357,18 @@ function MainScreenInner() {
       runEditorQuery,
       openPalette,
       goSelect,
+      requestConfirm,
       getEditorText,
       setEditorText,
       openInputPrompt,
       openSwitchModal,
       saveAs,
-      clearActive,
+      newQuery,
+      discardUnsavedAndPersist,
       renameActive,
       deleteActive,
       activeQuery,
-      queries.length,
+      queries,
     ],
   );
   const commandNames = useMemo(() => cmds.map((c) => c.name), [cmds]);
@@ -424,7 +439,7 @@ function MainScreenInner() {
     // Ctrl+N starts a new empty query.
     // Note: some terminal emulators capture Ctrl+N for "new window".
     if (key.ctrl && key.name === "n") {
-      clearActive(getEditorText());
+      newQuery(getEditorText());
       setEditorText("");
       return;
     }

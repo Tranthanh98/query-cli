@@ -39,8 +39,12 @@ export interface QueriesContextValue {
   /** Snapshot the active query's text from the editor without changing
    *  which query is active. Useful before destructive ops. */
   snapshotActive: (currentText: string) => void
-  /** Clear the active selection (the editor becomes a scratch buffer). */
-  clearActive: (currentText: string) => void
+  /** Create a new unsaved query, snapshot the previous active query, and
+   *  make the new query active. */
+  newQuery: (currentText: string) => SavedQuery
+  /** Remove unsaved queries for the current connection and persist the rest.
+   *  Useful before exiting so scratch queries don't leak to disk. */
+  discardUnsavedAndPersist: () => void
 
   inputPrompt: InputPrompt | null
   openInputPrompt: (prompt: InputPrompt) => void
@@ -77,7 +81,14 @@ export function QueriesProvider({
     loadQueries()
       .then((qs) => {
         if (cancelled) return
-        setAllQueries(qs)
+        setAllQueries(qs.map((q) => ({ ...q, saved: true })))
+        const cid = connectionIdRef.current
+        const first = qs.find(
+          (q) => q.connectionId === cid || q.connectionId == null,
+        )
+        if (first) {
+          setActiveId((prev) => prev ?? first.id)
+        }
       })
       .catch(() => {})
     return () => {
@@ -99,6 +110,27 @@ export function QueriesProvider({
     void saveQueries(next).catch(() => {})
   }, [])
 
+  // Ensure there is always at least one query for the current connection.
+  useEffect(() => {
+    const cid = connectionIdRef.current
+    const forConn = allQueries.filter(
+      (q) => q.connectionId === cid || q.connectionId == null,
+    )
+    if (forConn.length === 0) {
+      const defaultQuery: SavedQuery = {
+        id: newQueryId(),
+        name: "Untitled query",
+        text: "",
+        connectionId: cid,
+        saved: false,
+      }
+      const next = [...allQueries, defaultQuery]
+      setAllQueries(next)
+      setActiveId(defaultQuery.id)
+      persist(next)
+    }
+  }, [allQueries, connectionId, persist])
+
   const saveAs = useCallback(
     (name: string, text: string) => {
       const entry: SavedQuery = {
@@ -106,6 +138,7 @@ export function QueriesProvider({
         name,
         text,
         connectionId: connectionIdRef.current,
+        saved: true,
       }
       const next = [...allQueriesRef.current, entry]
       setAllQueries(next)
@@ -132,12 +165,22 @@ export function QueriesProvider({
   const deleteActive = useCallback(() => {
     const id = activeIdRef.current
     if (!id) return null
-    const next = allQueriesRef.current.filter((q) => q.id !== id)
-    setAllQueries(next)
+    let next = allQueriesRef.current.filter((q) => q.id !== id)
     const cid = connectionIdRef.current
-    const fallback =
+    let fallback =
       next.find((q) => q.connectionId === cid || q.connectionId == null) ?? null
-    setActiveId(fallback?.id ?? null)
+    if (!fallback) {
+      fallback = {
+        id: newQueryId(),
+        name: "Untitled query",
+        text: "",
+        connectionId: cid,
+        saved: false,
+      }
+      next = [...next, fallback]
+    }
+    setAllQueries(next)
+    setActiveId(fallback.id)
     persist(next)
     return fallback
   }, [persist])
@@ -171,20 +214,39 @@ export function QueriesProvider({
     [persist],
   )
 
-  const clearActive = useCallback(
+  const newQuery = useCallback(
     (currentText: string) => {
       const prevId = activeIdRef.current
+      let next = allQueriesRef.current
       if (prevId) {
-        const next = allQueriesRef.current.map((q) =>
+        next = next.map((q) =>
           q.id === prevId ? { ...q, text: currentText } : q,
         )
-        setAllQueries(next)
-        persist(next)
       }
-      setActiveId(null)
+      const entry: SavedQuery = {
+        id: newQueryId(),
+        name: "Untitled query",
+        text: "",
+        connectionId: connectionIdRef.current,
+        saved: false,
+      }
+      next = [...next, entry]
+      setAllQueries(next)
+      setActiveId(entry.id)
+      persist(next)
+      return entry
     },
     [persist],
   )
+
+  const discardUnsavedAndPersist = useCallback(() => {
+    const cid = connectionIdRef.current
+    const savedOnly = allQueriesRef.current.filter(
+      (q) => q.saved !== false || q.connectionId !== cid,
+    )
+    setAllQueries(savedOnly)
+    persist(savedOnly)
+  }, [persist])
 
   const openInputPrompt = useCallback((prompt: InputPrompt) => setInputPrompt(prompt), [])
   const closeInputPrompt = useCallback(() => setInputPrompt(null), [])
@@ -217,7 +279,8 @@ export function QueriesProvider({
       deleteActive,
       switchTo,
       snapshotActive,
-      clearActive,
+      newQuery,
+      discardUnsavedAndPersist,
       inputPrompt,
       openInputPrompt,
       closeInputPrompt,
@@ -234,7 +297,8 @@ export function QueriesProvider({
       deleteActive,
       switchTo,
       snapshotActive,
-      clearActive,
+      newQuery,
+      discardUnsavedAndPersist,
       inputPrompt,
       openInputPrompt,
       closeInputPrompt,

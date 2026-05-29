@@ -347,6 +347,7 @@ function QueriesTab({ onSelectQuery }: { onSelectQuery: (id: string) => void }) 
           >
             <text fg={isActive ? colors.selectedFg : colors.text}>
               {isActive ? "▸ " : "  "}
+              {q.saved ? "✓ " : "* "}
               {q.name}
             </text>
           </box>

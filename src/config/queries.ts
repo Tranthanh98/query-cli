@@ -9,6 +9,9 @@ export interface SavedQuery {
   /** Connection this query belongs to. Undefined for legacy queries saved
    *  before per-connection scoping. */
   connectionId?: string;
+  /** Whether the query has been explicitly saved by the user. New queries
+   *  created with /new-query are unsaved until the user runs /save-query. */
+  saved?: boolean;
 }
 
 const CONFIG_DIR = join(homedir(), ".query-cli");
