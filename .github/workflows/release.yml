@@ -164,7 +164,8 @@ jobs:
         run: |
           npm config list
           npm whoami 2>/dev/null || echo "npm whoami failed (expected if no classic token)"
-          ls -la .npmrc 2>/dev/null || echo "No .npmrc in repo root"
+          cat .npmrc 2>/dev/null || echo "No .npmrc in repo root"
 
       - name: Publish main package
-        run: npm publish dist/query-cli --access public --provenance
+        run: npm publish --access public --provenance
+        working-directory: dist/query-cli
