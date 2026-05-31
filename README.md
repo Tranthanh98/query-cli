@@ -1,4 +1,6 @@
-<img width="879" height="548" alt="image" src="https://github.com/user-attachments/assets/d4fa7732-0407-4f03-a2b5-615c16be63e1" />
+<img width="600" height="380" alt="Screenshot 2026-05-29 at 15 40 34" src="https://github.com/user-attachments/assets/d598705d-93ef-4575-a512-bc6a700795e5" />
+
+<img width="600" height="380" alt="image" src="https://github.com/user-attachments/assets/d4fa7732-0407-4f03-a2b5-615c16be63e1" />
 
 # query-cli
 
